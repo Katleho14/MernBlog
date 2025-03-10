@@ -9,7 +9,8 @@ import Signup from './pages/Signup'
 const App = () => {
   return (
     <BrowserRouter>
-    <Routes>
+    <Header />
+        <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About/>} />
         <Route path="/dashboard" element={<Dashboard/>} />

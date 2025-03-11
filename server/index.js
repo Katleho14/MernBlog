@@ -1,16 +1,30 @@
-const express = require('express')
-require('dotenv').config();
-const mongoose = require('mongoose');
-const app = express()
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import userRoute from './routes/user.routes.js'
 
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+dotenv.config();
+
+mongoose.connect(process.env.MONGODB_URI,)
   .then(() => console.log('Connected!'))
   .catch(err => console.error('Connection error', err));
+
+const app = express()
+
+
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+});
+
+
+
+app.use("/api/user", userRoute);
+
+// app.get('/', (req, res) => {
+//     res.send("Hello from Test API!!!");
+// });
 
 app.get('/', (req, res) => {
     res.send('Hello World!!!');
 });
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
-});

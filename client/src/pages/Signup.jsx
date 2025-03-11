@@ -10,24 +10,7 @@ const [formData, setFormData] = useState({});
 const handleChange = async (e) => {
   setFormData({...formData, [e.target.id]: e.target.value});
 
-try {
 
-await fetch('/api/auth/signup', {
-
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    username: formData.username,
-    email: formData.email,
-    password: formData.password,
-  }),
-});
-
-} catch (error) {
-  console.error('Error during signup:', error);
-}
 
 };
 

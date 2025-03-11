@@ -1,11 +1,11 @@
 const express = require('express')
+require('dotenv').config();
 const mongoose = require('mongoose');
 const app = express()
 
-
-mongoose.connect('mongodb+srv://katleho123:katleho123@mern-blog.o9dbk.mongodb.net/mern-blog?retryWrites=true&w=majority')
-  .then(() => console.log('Connected!'));
-
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Connected!'))
+  .catch(err => console.error('Connection error', err));
 
 app.get('/', (req, res) => {
     res.send('Hello World!!!');

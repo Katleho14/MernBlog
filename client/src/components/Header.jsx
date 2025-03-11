@@ -45,7 +45,7 @@ via-purple-500 to-pink-500 rounded-lg text-white'>
 
 </Link>
 
-
+<Navbar.Toggle/>
 </div>
 
 <Navbar.Collapse>

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const app = express()
 
 
-mongoose.connect('mongodb://127.0.0.1:27017/test')
+mongoose.connect('mongodb+srv://katleho123:katleho123@mern-blog.o9dbk.mongodb.net/mern-blog?retryWrites=true&w=majority')
   .then(() => console.log('Connected!'));
 
 

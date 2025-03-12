@@ -2,6 +2,7 @@ import User from '../models/user.model.js';
 import bcryptjs from 'bcryptjs';
 
 export const signup = async (req, res, next) => {
+  try {
     const { username, email, password } = req.body;
 
     if (!username || !email || !password || username === "" || email === "" || password === "") {
@@ -9,14 +10,20 @@ export const signup = async (req, res, next) => {
     }
 
     const hashedPassword = bcryptjs.hashSync(password, 10);
-    const newUser = new User({ username, email, password: hashedPassword, });
-try {
-    await newUser.save();
-    res.status(201).json({ message: "User created successfully" }); // Use 201 for successful creation
+    const newUser = new User({ username, email, password: hashedPassword });
 
- } catch (error) {
-    // console.error("Signup error:", error); // Log the error for debugging
-    // res.status.json({ message: error.message }); // Send the error message
-    next(error); // Pass the error to the next middleware (if any)
+    await newUser.save();
+    res.status(201).json({ message: "User created successfully" });
+
+  } catch (error) {
+    console.error("Signup error:", error);
+
+    if (error.code === 11000) {
+      // Duplicate key error
+      return res.status(409).json({ message: "Email already exists" }) // 409 Conflict
+    }
+
+    res.status(500).json({ message: error.message });
+    next(error);
   }
 };

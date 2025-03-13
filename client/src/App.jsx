@@ -1,29 +1,33 @@
-import React from 'react'
-import {BrowserRouter, Routes, Route} from 'react-router-dom'
-import Home from './pages/Home'
-import About from './pages/About'
-import Dashboard from './pages/Dashboard'
-import Projects from './pages/Projects'
-import Signin from './pages/Signin'
-import Signup from './pages/Signup'
-import Header from './components/Header'
-import Footercom from './components/Footer'
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About';
+import Dashboard from './pages/Dashboard';
+import Projects from './pages/Projects';
+import Signin from './pages/Signin';
+import Signup from './pages/Signup';
+import Header from './components/Header';
+import Footercom from './components/Footer';
+import PostPage from './pages/PostPage';
+import Search from './pages/Search';
+
 const App = () => {
   return (
     <BrowserRouter>
-    <Header />
-        <Routes>
+      <Header />
+      <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About/>} />
-        <Route path="/dashboard" element={<Dashboard/>} />
-        <Route path="/projects" element={<Projects/>} />
-        <Route path="/signin" element={<Signin/>} />  
-        <Route path="/signup" element={<Signup/>} />
-    
-    </Routes>
- <Footercom/>
-   </BrowserRouter>
-  )
-}
+        <Route path="/about" element={<About />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/signin" element={<Signin />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/post/:postSlug" element={<PostPage />} />
+        <Route path="/search" element={<Search />} />
+      </Routes>
+      <Footercom />
+    </BrowserRouter>
+  );
+};
 
-export default App
+export default App;

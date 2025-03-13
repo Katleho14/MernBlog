@@ -1,13 +1,18 @@
 {
     "cSpell.words": [
         "bcryptjs",
+        "deletepost",
         "firebaseapp",
         "firebasestorage",
         "Footercom",
+        "getcomments",
+        "getposts",
         "mern",
         "persistor",
         "signup",
         "successfull",
+        "uncategorized",
+        "updatepost",
         "VITE"
     ]
 }

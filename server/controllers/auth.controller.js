@@ -5,25 +5,29 @@ export const signup = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
 
-    if (!username || !email || !password || username === "" || email === "" || password === "") {
+    // Validate input
+    if (!username || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const hashedPassword = bcryptjs.hashSync(password, 10);
-    const newUser = new User({ username, email, password: hashedPassword });
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: "Email already exists" }); // Prevent duplicate emails
+    }
 
+    // Hash the password before saving
+    const hashedPassword = bcryptjs.hashSync(password, 10);
+
+    // Create new user
+    const newUser = new User({ username, email, password: hashedPassword });
     await newUser.save();
+
     res.status(201).json({ message: "User created successfully" });
 
   } catch (error) {
     console.error("Signup error:", error);
-
-    if (error.code === 11000) {
-      // Duplicate key error
-      return res.status(409).json({ message: "Email already exists" }) // 409 Conflict
-    }
-
-    res.status(500).json({ message: error.message });
-    next(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
+

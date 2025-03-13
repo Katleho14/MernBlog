@@ -17,7 +17,6 @@ email: {
     password: {
         type: String,
         required: true,
-        unique: true,
         },
 
 },

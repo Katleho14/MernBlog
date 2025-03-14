@@ -59,3 +59,19 @@ app.use((err, req, res, next) => {
     message,
   });
 });
+
+// filepath: client/src/api/index.js (example)
+
+
+export const fetchPosts = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/posts`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    throw error; // Re-throw the error to be handled by the component
+  }
+};

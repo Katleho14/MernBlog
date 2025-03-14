@@ -1,0 +1,6 @@
+services:
+  - type: web_static
+    name: client
+    runtime: static
+    buildCommand: npm run build
+    staticDir: dist

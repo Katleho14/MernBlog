@@ -24,7 +24,7 @@ const __dirname = path.resolve();
 const app = express();
 
 // ✅ Enable CORS (Replace with your frontend URL when deployed)
-const allowedOrigins = ["https://mernblog-q4t5.onrender.com/", "https://mern-blog-embt.onrender.com"];
+const allowedOrigins = ["https://mernblog-q4t5.onrender.com", "https://mern-blog-embt.onrender.com"];
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 app.use(express.json());

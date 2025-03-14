@@ -9,7 +9,7 @@ export default defineConfig({
       "/api": {
         target: "https://mern-blog-embt.onrender.com/",
         secure: false,
-        
+        changeOrigin: true,
       },
 
 

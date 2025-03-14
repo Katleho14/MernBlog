@@ -20,5 +20,8 @@ export default defineConfig({
   build: {
     outDir: 'dist', // Explicitly specify the output directory
     chunkSizeWarningLimit: 1000, // Increase to 1000 KB (1 MB)
+ // Or whatever your desired output directory is
+    assetsDir: 'assets', // Directory for assets (optional)
+    sourcemap: true,
   },
 });

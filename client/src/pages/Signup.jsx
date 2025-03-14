@@ -1,32 +1,24 @@
-
 import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  signUpStart,
-  signUpSuccess,
-  signUpFailure,
-} from '../redux/user/userSlice'; // Import signup actions
 import OAuth from '../components/OAuth';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({});
-  const { loading, error: errorMessage } = useSelector((state) => state.user); // Get loading and error from Redux
-  const dispatch = useDispatch();
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.username || !formData.email || !formData.password) {
-      return dispatch(signUpFailure('Please fill out all fields.')); // Dispatch failure for empty fields
+      return setErrorMessage('Please fill out all fields.');
     }
     try {
-      dispatch(signUpStart()); // Dispatch signup start
+      setLoading(true);
+      setErrorMessage(null);
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -34,24 +26,26 @@ export default function SignUp() {
       });
       const data = await res.json();
       if (data.success === false) {
-        dispatch(signUpFailure(data.message)); // Dispatch failure with server message
-      } else {
-        dispatch(signUpSuccess()); // Dispatch signup success
+        return setErrorMessage(data.message);
+      }
+      setLoading(false);
+      if(res.ok) {
         navigate('/sign-in');
       }
     } catch (error) {
-      dispatch(signUpFailure('An error occurred during sign-up.')); // Dispatch generic error
-      console.error('Signup error:', error); // Log the error
+      setErrorMessage(error.message);
+      setLoading(false);
     }
   };
-
   return (
     <div className='min-h-screen mt-20'>
       <div className='flex p-3 max-w-3xl mx-auto flex-col md:flex-row md:items-center gap-5'>
         {/* left */}
         <div className='flex-1'>
           <Link to='/' className='font-bold dark:text-white text-4xl'>
-            <span className='px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white'>Katleho's</span> Blog
+            <span className='px-2 py-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white'>
+              Katleho's
+            </span> Blog
           </Link>
           <p className='text-sm mt-5'>
             This is a demo project. You can sign up with your email and password

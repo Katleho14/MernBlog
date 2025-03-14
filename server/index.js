@@ -63,9 +63,10 @@ app.use((err, req, res, next) => {
 // filepath: client/src/api/index.js (example)
 
 
+// client/src/api/index.js
 export const fetchPosts = async () => {
   try {
-    const response = await fetch(`${API_URL}/api/posts`);
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}api/post/getPosts`);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }

@@ -8,12 +8,21 @@ export default function Home() {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const res = await fetch('/api/post/getPosts');
-      const data = await res.json();
-      setPosts(data.posts);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}api/post/getPosts`);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const data = await res.json();
+        setPosts(data.posts);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+        // Optionally, set an error state to display a message to the user
+      }
     };
     fetchPosts();
   }, []);
+
   return (
     <div>
       <div className='flex flex-col gap-6 p-28 px-3 max-w-6xl mx-auto '>

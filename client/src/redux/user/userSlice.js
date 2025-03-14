@@ -78,8 +78,11 @@ export const {
   updateSuccess,
   updateFailure,
   deleteStart,
+  deleteUserStart,
   deleteSuccess,
+  deleteUserSuccess,
   deleteFailure,
+  deleteUserFailure,
   signOutSuccess,
   signUpStart, // Export signup actions
   signUpSuccess,

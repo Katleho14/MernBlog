@@ -39,7 +39,7 @@ const PostPage = () => {
   useEffect(() => {
     const fetchRecentPosts = async () => {
       try {
-        const res = await fetch(`https://mern-blog-embt.onrender.com//api/post/getposts?limit=3`);
+        const res = await fetch(`/api/post/getposts?limit=3`);
         const data = await res.json();
         if (res.ok) {
           setRecentPosts(data.posts);

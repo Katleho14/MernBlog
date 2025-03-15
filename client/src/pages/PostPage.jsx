@@ -1,33 +1,38 @@
-/* eslint-disable no-unused-vars */
+// PostPage.jsx
+
 import { Button, Spinner } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import CallToAction from '../components/CallToAction';
+import CommentSection from '../components/CommentSection';
 import PostCard from '../components/PostCard';
 
 const PostPage = () => {
   const { postSlug } = useParams();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
   const [post, setPost] = useState(null);
   const [recentPosts, setRecentPosts] = useState(null);
 
   useEffect(() => {
     const fetchPost = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        setLoading(true);
-        setError(false);
-
-        const res = await fetch(`/api/post/getposts?slug=${postSlug}`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}api/post/getposts?slug=${postSlug}`);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
         const data = await res.json();
 
-        if (!res.ok || !data.posts.length) {
-          throw new Error('Post not found');
+        if (!data?.posts?.length) {
+          throw new Error('Post data invalid');
         }
 
         setPost(data.posts[0]);
       } catch (err) {
-        setError(true);
+        setError(err.message || 'Failed to fetch post');
+        console.error('Error fetching post:', err);
       } finally {
         setLoading(false);
       }
@@ -39,31 +44,41 @@ const PostPage = () => {
   useEffect(() => {
     const fetchRecentPosts = async () => {
       try {
-        const res = await fetch(`/api/post/getposts?limit=3`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}api/post/getposts?limit=3`);
+        if (!res.ok) {
+          throw new Error('Failed to fetch recent posts');
+        }
         const data = await res.json();
-        if (res.ok) {
+        if (data?.posts) {
           setRecentPosts(data.posts);
+        } else {
+          console.error('Recent posts data invalid');
         }
       } catch (err) {
-        console.error('Error fetching recent posts:', err.message);
+        setError(err.message || 'Failed to fetch recent posts');
+        console.error('Error fetching recent posts:', err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchRecentPosts();
   }, []);
 
-  if (loading)
+  if (loading) {
     return (
       <div className='flex justify-center items-center min-h-screen'>
         <Spinner size='xl' />
       </div>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
       <div className='flex justify-center items-center min-h-screen text-red-500'>
-        Error loading post. Please try again later.
+        Error: {error}
       </div>
     );
+  }
 
   return (
     <main className='p-3 flex flex-col max-w-6xl mx-auto min-h-screen'>
@@ -96,7 +111,7 @@ const PostPage = () => {
       <div className='max-w-4xl mx-auto w-full'>
         <CallToAction />
       </div>
-
+      {post?._id && <CommentSection postId={post._id} />}
 
       <div className='flex flex-col justify-center items-center mb-5'>
         <h1 className='text-xl mt-5'>Recent articles</h1>

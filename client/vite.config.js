@@ -3,17 +3,13 @@ import react from '@vitejs/plugin-react-swc'
 
 // https://vite.dev/config/
 export default defineConfig({
-   server: {
-
+  server: {
     proxy: {
-      "/api": {
-        target: "https://mern-blog-embt.onrender.com/",
+      '/api': {
+        target: 'http://localhost:3000',
         secure: false,
-        changeOrigin: true,
       },
-
-
-   },
+    },
   },
 
   plugins: [react()],

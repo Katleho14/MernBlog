@@ -18,18 +18,19 @@ const PostPage = () => {
       try {
         setLoading(true);
         setError(false);
-  
+
         console.log(`Fetching post with slug: ${postSlug}`);
-  
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getposts?slug=${postSlug}`);
+
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPost?slug=${postSlug}`);
+        console.log("Full API URL:", `${import.meta.env.VITE_API_BASE_URL}/api/post/getPost?slug=${postSlug}`);
         const data = await res.json();
-  
+
         console.log("API Response:", data);
-  
+
         if (!res.ok || !data.success || !data.posts || data.posts.length === 0) {
           throw new Error(data.message || "Post not found");
         }
-  
+
         setPost(data.posts[0]);
       } catch (err) {
         console.error("Fetch Post Error:", err.message);
@@ -38,10 +39,9 @@ const PostPage = () => {
         setLoading(false);
       }
     };
-  
+
     fetchPost();
   }, [postSlug]);
-  
 
   useEffect(() => {
     const fetchRecentPosts = async () => {
@@ -123,5 +123,4 @@ const PostPage = () => {
 };
 
 export default PostPage;
-
 

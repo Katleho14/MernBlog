@@ -1,126 +1,129 @@
+// PostsListPage.js (or SearchResultsPage.js, depending on your use case)
 
-import { Button, Spinner } from 'flowbite-react';
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import CallToAction from '../components/CallToAction';
-import PostCard from '../components/PostCard';
-import DOMPurify from 'dompurify';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom'; // Import useSearchParams
+import PostCard from '../components/PostCard'; // Assuming you have a PostCard component
 
-const PostPage = () => {
-  const { postSlug } = useParams();
+const PostsListPage = () => {
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [post, setPost] = useState(null);
-  const [recentPosts, setRecentPosts] = useState([]);
+  const [error, setError] = useState(null);
+  const [searchParams] = useSearchParams(); // Get search parameters from URL
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchPosts = async () => {
       try {
         setLoading(true);
-        setError(false);
+        setError(null);
 
-        console.log(`Fetching post with slug: ${postSlug}`);
+        const searchQuery = searchParams.get('search') || ''; // Get search query
+        const categoryFilter = searchParams.get('category') || ''; // Get category filter
+        const sortOrder = searchParams.get('sort') || 'latest'; // Get sort order
 
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPost?slug=${postSlug}`);
-        console.log("Full API URL:", `${import.meta.env.VITE_API_BASE_URL}/api/post/getPost?slug=${postSlug}`);
-        const data = await res.json();
+        // Construct the API URL with search parameters and filters
+        let apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts?`;
 
-        console.log("API Response:", data);
-
-        if (!res.ok || !data.success || !data.posts || data.posts.length === 0) {
-          throw new Error(data.message || "Post not found");
+        if (searchQuery) {
+          apiUrl += `search=${searchQuery}&`;
         }
 
-        setPost(data.posts[0]);
+        if (categoryFilter) {
+          apiUrl += `category=${categoryFilter}&`;
+        }
+
+        if (sortOrder) {
+          apiUrl += `sort=${sortOrder}&`;
+        }
+
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+
+        if (res.ok) {
+          setPosts(data.posts);
+        } else {
+          setError(data.message || 'Failed to fetch posts');
+        }
       } catch (err) {
-        console.error("Fetch Post Error:", err.message);
-        setError(true);
+        setError(err.message || 'An error occurred');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPost();
-  }, [postSlug]);
+    fetchPosts();
+  }, [searchParams]); // Re-fetch when search parameters change
 
-  useEffect(() => {
-    const fetchRecentPosts = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts?limit=3`);
-        const data = await res.json();
-        if (res.ok) {
-          setRecentPosts(data.posts);
-        }
-      } catch (err) {
-        console.error('Error fetching recent posts:', err.message);
-      }
-    };
-    fetchRecentPosts();
-  }, []);
-
-  if (loading)
+  if (loading) {
     return (
       <div className='flex justify-center items-center min-h-screen'>
-        <Spinner size='xl' />
+        Loading...
       </div>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
       <div className='flex justify-center items-center min-h-screen text-red-500'>
-        Error loading post. Please try again later.
+        Error: {error}
       </div>
     );
+  }
 
   return (
     <main className='p-3 flex flex-col max-w-6xl mx-auto min-h-screen'>
       <h1 className='text-3xl mt-10 p-3 text-center font-serif max-w-2xl mx-auto lg:text-4xl'>
-        {post?.title}
+        Posts Results
       </h1>
-      <Link
-        to={`/search?category=${post?.category}`}
-        className='self-center mt-5'
-      >
-        <Button color='gray' pill size='xs'>
-          {post?.category}
-        </Button>
-      </Link>
-      <img
-        src={post?.image}
-        alt={post?.title}
-        className='mt-10 p-3 max-h-[600px] w-full object-cover'
-      />
-      <div className='flex justify-between p-3 border-b border-slate-500 mx-auto w-full max-w-2xl text-xs'>
-        <span>{post?.createdAt && new Date(post.createdAt).toLocaleDateString()}</span>
-        <span className='italic'>
-          {post?.content?.length ? (post.content.length / 1000).toFixed(0) : 0} mins read
-        </span>
-      </div>
-      
-      {post?.content && (
-        <div
-          className='p-3 max-w-2xl mx-auto w-full post-content'
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
-        ></div>
-      )}
 
-      <div className='max-w-4xl mx-auto w-full'>
-        <CallToAction />
+      {/* Add your search/filter UI components here */}
+      {/* Example: */}
+      <div className='flex flex-wrap gap-2 mt-5'>
+        <select
+          value={searchParams.get('sort') || 'latest'}
+          onChange={(e) => {
+            searchParams.set('sort', e.target.value);
+            window.location.search = searchParams.toString();
+          }}
+        >
+          <option value='latest'>Latest</option>
+          <option value='oldest'>Oldest</option>
+          {/* Add more sorting options if needed */}
+        </select>
+
+        <select
+          value={searchParams.get('category') || ''}
+          onChange={(e) => {
+            searchParams.set('category', e.target.value);
+            window.location.search = searchParams.toString();
+          }}
+        >
+          <option value=''>All Categories</option>
+          <option value='Uncategorized'>Uncategorized</option>
+          {/* Add more category options from your API */}
+        </select>
+
+        <input
+          type='text'
+          placeholder='Search...'
+          value={searchParams.get('search') || ''}
+          onChange={(e) => {
+            searchParams.set('search', e.target.value);
+            window.location.search = searchParams.toString();
+          }}
+        />
       </div>
 
-      <div className='flex flex-col justify-center items-center mb-5'>
-        <h1 className='text-xl mt-5'>Recent articles</h1>
-        <div className='flex flex-wrap gap-5 mt-5 justify-center'>
-          {recentPosts.length > 0 ? (
-            recentPosts.map((recentPost) => <PostCard key={recentPost._id} post={recentPost} />)
-          ) : (
-            <p className='text-center text-gray-500'>No recent posts available.</p>
-          )}
+      {posts.length > 0 ? (
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-5'>
+          {posts.map((post) => (
+            <PostCard key={post._id} post={post} />
+          ))}
         </div>
-      </div>
+      ) : (
+        <p className='text-center text-gray-500 mt-5'>No posts found.</p>
+      )}
     </main>
   );
 };
 
-export default PostPage;
-
+export default PostsListPage;

@@ -105,3 +105,30 @@ export const updatepost = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getPost = async (req, res, next) => {
+  try {
+    console.log('Incoming request to getPosts:', req.query);
+
+    let query = {};
+    if (req.query.slug) {
+      query.slug = req.query.slug;
+    }
+
+    if (req.query.category) {
+      query.category = req.query.category;
+    }
+
+    const posts = await Post.find(query).sort({ createdAt: -1 });
+
+    if (!posts.length) {
+      console.log('No posts found for query:', query);
+      return res.status(404).json({ message: 'No posts found' });
+    }
+
+    res.status(200).json({ success: true, posts });
+  } catch (error) {
+    console.error('Error in getPosts:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};

@@ -5,15 +5,24 @@ import PostCard from '../components/PostCard';
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const res = await fetch('https://mern-blog-embt.onrender.com/api/post/getPosts');
-      const data = await res.json();
-      setPosts(data.posts);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts`);
+        if (!res.ok) throw new Error('Failed to fetch posts');
+        const data = await res.json();
+        setPosts(data.posts);
+      } catch (error) {
+        console.error('Error fetching posts:', error.message);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchPosts();
   }, []);
+
   return (
     <div>
       <div className='flex flex-col gap-6 p-28 px-3 max-w-6xl mx-auto '>
@@ -29,12 +38,16 @@ export default function Home() {
           View all posts
         </Link>
       </div>
+
       <div className='p-3 bg-amber-100 dark:bg-slate-700'>
         <CallToAction />
       </div>
 
       <div className='max-w-6xl mx-auto p-3 flex flex-col gap-8 py-7'>
-        {posts && posts.length > 0 && (
+        {loading && (
+          <p className='text-center text-gray-500'>Loading posts...</p>
+        )}
+        {!loading && posts.length > 0 && (
           <div className='flex flex-col gap-6'>
             <h2 className='text-2xl font-semibold text-center'>Recent Posts</h2>
             <div className='flex flex-wrap gap-4'>
@@ -49,6 +62,9 @@ export default function Home() {
               View all posts
             </Link>
           </div>
+        )}
+        {!loading && posts.length === 0 && (
+          <p className='text-center text-gray-500'>No posts available.</p>
         )}
       </div>
     </div>

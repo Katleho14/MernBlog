@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.1",
+    "dompurify": "^3.2.4",
     "firebase": "^11.4.0",
     "flowbite-react": "^0.10.2",
     "moment": "^2.30.1",

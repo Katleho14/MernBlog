@@ -1,45 +1,52 @@
-/* eslint-disable no-unused-vars */
+
 import { Button, Spinner } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import CallToAction from '../components/CallToAction';
 import PostCard from '../components/PostCard';
+import DOMPurify from 'dompurify';
 
 const PostPage = () => {
   const { postSlug } = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [post, setPost] = useState(null);
-  const [recentPosts, setRecentPosts] = useState(null);
+  const [recentPosts, setRecentPosts] = useState([]);
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
         setLoading(true);
         setError(false);
-
-        const res = await fetch(`https://mern-blog-embt.onrender.com/api/post/getPosts?slug=${postSlug}`);
+  
+        console.log(`Fetching post with slug: ${postSlug}`);
+  
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getposts?slug=${postSlug}`);
         const data = await res.json();
-
-        if (!res.ok || !data.posts.length) {
-          throw new Error('Post not found');
+  
+        console.log("API Response:", data);
+  
+        if (!res.ok || !data.success || !data.posts || data.posts.length === 0) {
+          throw new Error(data.message || "Post not found");
         }
-
+  
         setPost(data.posts[0]);
       } catch (err) {
+        console.error("Fetch Post Error:", err.message);
         setError(true);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchPost();
   }, [postSlug]);
+  
 
   useEffect(() => {
     const fetchRecentPosts = async () => {
       try {
-        const res = await fetch(`https://mern-blog-embt.onrender.com/api/post/getPosts?limit=3`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts?limit=3`);
         const data = await res.json();
         if (res.ok) {
           setRecentPosts(data.posts);
@@ -89,19 +96,26 @@ const PostPage = () => {
           {post?.content?.length ? (post.content.length / 1000).toFixed(0) : 0} mins read
         </span>
       </div>
-      <div
-        className='p-3 max-w-2xl mx-auto w-full post-content'
-        dangerouslySetInnerHTML={{ __html: post?.content || '' }}
-      ></div>
+      
+      {post?.content && (
+        <div
+          className='p-3 max-w-2xl mx-auto w-full post-content'
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
+        ></div>
+      )}
+
       <div className='max-w-4xl mx-auto w-full'>
         <CallToAction />
       </div>
 
-
       <div className='flex flex-col justify-center items-center mb-5'>
         <h1 className='text-xl mt-5'>Recent articles</h1>
         <div className='flex flex-wrap gap-5 mt-5 justify-center'>
-          {recentPosts?.map((recentPost) => <PostCard key={recentPost._id} post={recentPost} />)}
+          {recentPosts.length > 0 ? (
+            recentPosts.map((recentPost) => <PostCard key={recentPost._id} post={recentPost} />)
+          ) : (
+            <p className='text-center text-gray-500'>No recent posts available.</p>
+          )}
         </div>
       </div>
     </main>
@@ -109,3 +123,5 @@ const PostPage = () => {
 };
 
 export default PostPage;
+
+

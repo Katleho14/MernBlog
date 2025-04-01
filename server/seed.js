@@ -110,7 +110,93 @@ const seedPosts = async () => {
         category: 'security',
         slug: 'web-security-best-practices',
       },
+      {
+        userId: '6623b11a929a9c671496079a', // Replace with a valid user ID
+        title: 'How to Set Up Clerk with Next.js: A Quickstart Guide',
+        content: `Clerk is a powerful authentication and user management solution that seamlessly integrates with Next.js applications. This guide walks you through setting up Clerk with Next.js quickly and efficiently.
+
+Prerequisites
+Before starting, ensure you have:
+
+Node.js installed
+A Next.js project set up (or create one using npx create-next-app@latest)
+A Clerk account (sign up at Clerk.dev)
+Step 1: Install Clerk SDK
+Navigate to your Next.js project and install the required Clerk packages:
+
+npm install @clerk/nextjs
+Or using Yarn:
+
+yarn add @clerk/nextjs
+Step 2: Set Up Clerk in Next.js
+Go to the Clerk dashboard and create a new application.
+Retrieve the Frontend API URL and Secret Key from the Clerk dashboard.
+Add these environment variables to your .env.local file:
+NEXT_PUBLIC_CLERK_FRONTEND_API=<your-frontend-api-url>
+CLERK_API_KEY=<your-secret-key>
+Step 3: Wrap Your App with Clerk Provider
+Modify pages/_app.js or pages/_app.tsx to include ClerkProvider:
+
+import { ClerkProvider } from "@clerk/nextjs";
+import "../styles/globals.css";
+
+function MyApp({ Component, pageProps }) {
+  return (
+    <ClerkProvider {...pageProps}>
+      <Component {...pageProps} />
+    </ClerkProvider>
+  );
+}
+
+export default MyApp;
+Step 4: Add Authentication Components
+You can now use Clerk’s authentication components, such as SignIn and SignUp, in your Next.js app.
+
+Create a pages/sign-in.js file and add:
+
+import { SignIn } from "@clerk/nextjs";
+
+export default function SignInPage() {
+  return <SignIn />;
+}
+Similarly, for sign-up, create pages/sign-up.js:
+
+import { SignUp } from "@clerk/nextjs";
+
+export default function SignUpPage() {
+  return <SignUp />;
+}
+Step 5: Protect Routes with Clerk
+To restrict access to certain pages, use Clerk’s withAuth wrapper in pages/protected.js:
+
+import { withAuth } from "@clerk/nextjs";
+
+export default withAuth(
+  function ProtectedPage() {
+    return <h1>Protected Content</h1>;
+  },
+  { redirectTo: "/sign-in" }
+);
+Step 6: Deploy and Test
+Run your Next.js app locally:
+
+npm run dev
+Visit /sign-in or /sign-up to see Clerk in action. Once everything works, deploy your app using Vercel or another hosting provider.
+
+Conclusion
+By following this guide, you’ve successfully integrated Clerk authentication into your Next.js application. You can now leverage Clerk’s full range of authentication features, such as social login, multi-factor authentication, and user management.
+
+For more advanced configurations, refer to the Clerk documentation.`,
+        image: 'https://firebasestorage.googleapis.com/v0/b/mern-blog-b327f.appspot.com/o/1743057239191-photo_2025-03-27%2013.32.26-min.jpeg?alt=media&token=31880c79-a0e6-420f-b717-a39a758872ca', // Placeholder image
+        category: 'nextjs',
+        slug: 'How to Set Up Clerk with Next.js: A Quickstart Guide',
+      },
+      
+      
+      
+
     ];
+    
 
     // Create the new posts
     await Post.insertMany(initialPosts);

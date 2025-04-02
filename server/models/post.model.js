@@ -1,38 +1,39 @@
-import mongoose from 'mongoose';
+import { DataTypes } from "sequelize";
+import sequelize from "../database.js";
 
-const postSchema = new mongoose.Schema(
-  {
-    userId: {
-      type: String,
-      required: true,
-    },
-    content: {
-      type: String,
-      required: true,
-    },
-    title: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    image: {
-      type: String,
-      default:
-        'https://www.hostinger.com/tutorials/wp-content/uploads/sites/2/2021/09/how-to-write-a-blog-post.png',
-    },
-    category: {
-      type: String,
-      default: 'uncategorized',
-    },
-    slug: {
-      type: String,
-      required: true,
-      unique: true,
-    },
+const Post = sequelize.define("Post", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
   },
-  { timestamps: true }
-);
-
-const Post = mongoose.model('Post', postSchema);
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  content: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  image: {
+    type: DataTypes.STRING,
+    defaultValue:
+      "https://www.hostinger.com/tutorials/wp-content/uploads/sites/2/2021/09/how-to-write-a-blog-post.png",
+  },
+  category: {
+    type: DataTypes.STRING,
+    defaultValue: "uncategorized",
+  },
+  slug: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+}, { timestamps: true });
 
 export default Post;

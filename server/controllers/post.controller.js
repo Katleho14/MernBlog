@@ -1,5 +1,6 @@
-import Post from '../models/post.model.js';
+import Post from '../models/post.model.js'
 import { errorHandler } from '../utils/error.js';
+import { Op } from 'sequelize';
 
 export const create = async (req, res, next) => {
   if (!req.user.isAdmin) {
@@ -13,93 +14,84 @@ export const create = async (req, res, next) => {
     .join('-')
     .toLowerCase()
     .replace(/[^a-zA-Z0-9-]/g, '');
-  const newPost = new Post({
-    ...req.body,
-    slug,
-    userId: req.user.id,
-  });
+
   try {
-    const savedPost = await newPost.save();
-    res.status(201).json(savedPost);
+    const newPost = await Post.create({
+      ...req.body,
+      slug,
+      userId: req.user.id,
+    });
+    res.status(201).json(newPost);
   } catch (error) {
     next(error);
   }
 };
 
-export const getposts = async (req, res, next) => {
+export const getPosts = async (req, res, next) => {
   try {
     const startIndex = parseInt(req.query.startIndex) || 0;
     const limit = parseInt(req.query.limit) || 9;
-    const sortDirection = req.query.order === 'asc' ? 1 : -1;
-    const posts = await Post.find({
-      ...(req.query.userId && { userId: req.query.userId }),
-      ...(req.query.category && { category: req.query.category }),
-      ...(req.query.slug && { slug: req.query.slug }),
-      ...(req.query.postId && { _id: req.query.postId }),
-      ...(req.query.searchTerm && {
-        $or: [
-          { title: { $regex: req.query.searchTerm, $options: 'i' } },
-          { content: { $regex: req.query.searchTerm, $options: 'i' } },
-        ],
-      }),
-    })
-      .sort({ updatedAt: sortDirection })
-      .skip(startIndex)
-      .limit(limit);
+    const order = req.query.order === 'asc' ? 'ASC' : 'DESC';
 
-    const totalPosts = await Post.countDocuments();
+    const whereCondition = {};
+    if (req.query.userId) whereCondition.userId = req.query.userId;
+    if (req.query.category) whereCondition.category = req.query.category;
+    if (req.query.slug) whereCondition.slug = req.query.slug;
+    if (req.query.postId) whereCondition.id = req.query.postId;
+    if (req.query.searchTerm) {
+      whereCondition[Op.or] = [
+        { title: { [Op.iLike]: `%${req.query.searchTerm}%` } },
+        { content: { [Op.iLike]: `%${req.query.searchTerm}%` } },
+      ];
+    }
 
-    const now = new Date();
-
-    const oneMonthAgo = new Date(
-      now.getFullYear(),
-      now.getMonth() - 1,
-      now.getDate()
-    );
-
-    const lastMonthPosts = await Post.countDocuments({
-      createdAt: { $gte: oneMonthAgo },
+    const { rows: posts, count: totalPosts } = await Post.findAndCountAll({
+      where: whereCondition,
+      order: [['updatedAt', order]],
+      offset: startIndex,
+      limit,
     });
 
-    res.status(200).json({
-      posts,
-      totalPosts,
-      lastMonthPosts,
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    const lastMonthPosts = await Post.count({
+      where: { createdAt: { [Op.gte]: oneMonthAgo } },
     });
+
+    res.status(200).json({ posts, totalPosts, lastMonthPosts });
   } catch (error) {
     next(error);
   }
 };
 
-export const deletepost = async (req, res, next) => {
+export const deletePost = async (req, res, next) => {
   if (!req.user.isAdmin || req.user.id !== req.params.userId) {
     return next(errorHandler(403, 'You are not allowed to delete this post'));
   }
   try {
-    await Post.findByIdAndDelete(req.params.postId);
+    await Post.destroy({ where: { id: req.params.postId } });
     res.status(200).json('The post has been deleted');
   } catch (error) {
     next(error);
   }
 };
 
-export const updatepost = async (req, res, next) => {
+export const updatePost = async (req, res, next) => {
   if (!req.user.isAdmin || req.user.id !== req.params.userId) {
     return next(errorHandler(403, 'You are not allowed to update this post'));
   }
   try {
-    const updatedPost = await Post.findByIdAndUpdate(
-      req.params.postId,
+    await Post.update(
       {
-        $set: {
-          title: req.body.title,
-          content: req.body.content,
-          category: req.body.category,
-          image: req.body.image,
-        },
+        title: req.body.title,
+        content: req.body.content,
+        category: req.body.category,
+        image: req.body.image,
       },
-      { new: true }
+      { where: { id: req.params.postId } }
     );
+    const updatedPost = await Post.findByPk(req.params.postId);
     res.status(200).json(updatedPost);
   } catch (error) {
     next(error);
@@ -110,19 +102,17 @@ export const getPost = async (req, res, next) => {
   try {
     console.log('Incoming request to getPosts:', req.query);
 
-    let query = {};
-    if (req.query.slug) {
-      query.slug = req.query.slug;
-    }
+    const whereCondition = {};
+    if (req.query.slug) whereCondition.slug = req.query.slug;
+    if (req.query.category) whereCondition.category = req.query.category;
 
-    if (req.query.category) {
-      query.category = req.query.category;
-    }
-
-    const posts = await Post.find(query).sort({ createdAt: -1 });
+    const posts = await Post.findAll({
+      where: whereCondition,
+      order: [['createdAt', 'DESC']],
+    });
 
     if (!posts.length) {
-      console.log('No posts found for query:', query);
+      console.log('No posts found for query:', whereCondition);
       return res.status(404).json({ message: 'No posts found' });
     }
 

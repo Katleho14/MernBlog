@@ -12,6 +12,7 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST || 'localhost',
     dialect: 'mysql',
     dialectModule: mysql, // Use mysql2 as the dialect module
+    logging: false, // Set to true to see SQL queries
   }
 );
 

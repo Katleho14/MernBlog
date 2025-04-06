@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize';
-import mysql from 'mysql2/promise';
+import * as mysql from 'mysql2'; // ✅ fix here
+import mysqlPromise from 'mysql2/promise'; // optional: for raw pool usage
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -11,12 +12,13 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST || 'localhost',
     dialect: 'mysql',
-    dialectModule: mysql, // Use mysql2 as the dialect module
-    logging: false, // Set to true to see SQL queries
+    dialectModule: mysql,
+    logging: false,
   }
 );
 
-const pool = mysql.createPool({
+// Optional: use this for raw queries if needed
+const pool = mysqlPromise.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',

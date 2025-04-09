@@ -15,13 +15,16 @@ dotenv.config();
 
 const app = express();
 
+// ✅ Use a safe port (not 3306)
+const PORT = process.env.PORT && process.env.PORT !== '3306' ? process.env.PORT : 3000;
+
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://mernblog-q4t5.onrender.com'], // Frontend URLs
-    credentials: true, // Allow cookies to be sent
+    origin: ['http://localhost:5173', 'https://mernblog-q4t5.onrender.com'],
+    credentials: true,
   })
 );
 
@@ -29,7 +32,7 @@ app.use(
 pool.getConnection()
   .then(connection => {
     console.log('✅ MySQL Connected Successfully (Pool)');
-    connection.release(); // Release the connection back to the pool
+    connection.release();
   })
   .catch((err) => console.error('❌ MySQL Connection Failed (Pool):', err));
 
@@ -38,18 +41,17 @@ sequelize
   .authenticate()
   .then(() => {
     console.log('✅ MySQL connected (Sequelize)');
-    return sequelize.sync(); // Sync models to database
+    return sequelize.sync();
   })
   .then(() => {
     console.log('✅ Database synchronized');
-    app.listen(process.env.PORT || 3000, () => {
-      console.log(`🚀 Server running on port ${process.env.PORT || 3000}`);
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   })
   .catch((err) => {
     console.error('❌ MySQL connection error (Sequelize):', err);
   });
-
 
 // Routes
 app.use('/api/user', userRoutes);
@@ -57,7 +59,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/post', postRoutes);
 app.use('/api/comment', commentRoutes);
 
-// Handle production static files correctly
+// Serve static files in production
 const __dirname = path.resolve();
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '/client/dist')));
@@ -66,7 +68,7 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Error handling middleware
+// Global error handler
 app.use((err, req, res, next) => {
   console.error('❌ Error:', err);
   res.status(err.statusCode || 500).json({
@@ -74,5 +76,6 @@ app.use((err, req, res, next) => {
     message: err.message || 'Internal Server Error',
   });
 });
+
 
 

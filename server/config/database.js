@@ -1,31 +1,39 @@
 import { Sequelize } from 'sequelize';
-import * as mysql from 'mysql2'; // ✅ fix here
-import mysqlPromise from 'mysql2/promise'; // optional: for raw pool usage
-import dotenv from "dotenv";
+import * as mysql from 'mysql2'; // ✅ Needed for Sequelize dialect
+import mysqlPromise from 'mysql2/promise'; // ✅ Optional: raw pool usage
+import dotenv from 'dotenv';
 
 dotenv.config();
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME || 'mern_blog',
-  process.env.DB_USER || 'root',
-  process.env.DB_PASSWORD || '',
-  {
-    host: process.env.DB_HOST || 'localhost',
-    dialect: 'mysql',
-    dialectModule: mysql,
-    logging: false,
-  }
-);
+// ✅ Use IPv4 loopback address instead of 'localhost'
+const DB_HOST = process.env.DB_HOST || '127.0.0.1';
+const DB_NAME = process.env.DB_NAME || 'mern_blog';
+const DB_USER = process.env.DB_USER || 'root';
+const DB_PASSWORD = process.env.DB_PASSWORD || '';
 
-// Optional: use this for raw queries if needed
+// ✅ Sequelize ORM setup
+const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
+  host: DB_HOST,
+  dialect: 'mysql',
+  dialectModule: mysql,
+  logging: false,
+});
+
+// ✅ Optional connection test (safe to remove in production)
+sequelize.authenticate()
+  .then(() => console.log('✅ Sequelize connected to MySQL successfully!'))
+  .catch(err => console.error('❌ Sequelize connection error:', err));
+
+// ✅ MySQL raw pool (for custom queries)
 const pool = mysqlPromise.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'mern_blog',
+  host: DB_HOST,
+  user: DB_USER,
+  password: DB_PASSWORD,
+  database: DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
 });
 
 export default { sequelize, pool };
+

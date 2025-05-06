@@ -25,5 +25,33 @@
         "updatepost",
         "Updload",
         "VITE"
+    ],
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "switchyard.proxy.rlwy.net:10070/railway",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "Railway Mysql",
+            "database": "railway",
+            "username": "root"
+        },
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "switchyard.proxy.rlwy.net:10070/railway",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "Rai",
+            "database": "railway",
+            "username": "root"
+        }
     ]
 }

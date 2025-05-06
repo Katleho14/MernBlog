@@ -52,6 +52,19 @@
             "name": "Rai",
             "database": "railway",
             "username": "root"
+        },
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "switchyard.proxy.rlwy.net",
+            "port": 10070,
+            "driver": "MySQL",
+            "database": "railway",
+            "username": "root",
+            "name": "Railway"
         }
     ]
 }

@@ -44,11 +44,17 @@ export default function Search() {
         }
         if (res.ok) {
           const data = await res.json();
-          setPosts(data.posts);
-          setLoading(false);
-          if (data.posts.length === 9) {
-            setShowMore(true);
+          if (data && data.posts && Array.isArray(data.posts)) { // Check if data and data.posts are defined and is an array
+            setPosts(data.posts);
+            setLoading(false);
+            if (data.posts.length === 9) {
+              setShowMore(true);
+            } else {
+              setShowMore(false);
+            }
           } else {
+            console.warn("Data or data.posts is undefined or not an array");
+            setLoading(false);
             setShowMore(false);
           }
         }

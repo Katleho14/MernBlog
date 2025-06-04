@@ -47,7 +47,7 @@ export default function Home() {
         {loading && (
           <p className='text-center text-gray-500'>Loading posts...</p>
         )}
-        {!loading && posts.length > 0 && (
+        {!loading && posts && posts.length > 0 && (
           <div className='flex flex-col gap-6'>
             <h2 className='text-2xl font-semibold text-center'>Recent Posts</h2>
             <div className='flex flex-wrap gap-4'>
@@ -63,7 +63,7 @@ export default function Home() {
             </Link>
           </div>
         )}
-        {!loading && posts.length === 0 && (
+        {!loading && (!posts || posts.length === 0) && (
           <p className='text-center text-gray-500'>No posts available.</p>
         )}
       </div>

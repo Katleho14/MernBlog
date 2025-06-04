@@ -1,4 +1,3 @@
-
 import { Button, Spinner } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -93,7 +92,7 @@ const PostPage = () => {
       <div className='flex justify-between p-3 border-b border-slate-500 mx-auto w-full max-w-2xl text-xs'>
         <span>{post?.createdAt && new Date(post.createdAt).toLocaleDateString()}</span>
         <span className='italic'>
-          {post?.content?.length ? (post.content.length / 1000).toFixed(0) : 0} mins read
+          {post?.content && post.content.length ? (post.content.length / 1000).toFixed(0) : 0} mins read
         </span>
       </div>
       

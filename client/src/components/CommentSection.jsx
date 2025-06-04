@@ -161,7 +161,7 @@ export default function CommentSection({ postId }) {
           )}
         </form>
       )}
-      {comments.length === 0 ? (
+      {Array.isArray(comments) && comments.length === 0 ? (
         <p className='text-sm my-5'>No comments yet!</p>
       ) : (
         <>
@@ -171,18 +171,19 @@ export default function CommentSection({ postId }) {
               <p>{comments.length}</p>
             </div>
           </div>
-          {comments.map((comment) => (
-            <Comment
-              key={comment._id}
-              comment={comment}
-              onLike={handleLike}
-              onEdit={handleEdit}
-              onDelete={(commentId) => {
-                setShowModal(true);
-                setCommentToDelete(commentId);
-              }}
-            />
-          ))}
+          {Array.isArray(comments) &&
+            comments.map((comment) => (
+              <Comment
+                key={comment._id}
+                comment={comment}
+                onLike={handleLike}
+                onEdit={handleEdit}
+                onDelete={(commentId) => {
+                  setShowModal(true);
+                  setCommentToDelete(commentId);
+                }}
+              />
+            ))}
         </>
       )}
       <Modal

@@ -49,6 +49,12 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
       console.log(error.message);
     }
   };
+  // Extract like label logic to a variable
+  let likeLabel = '0 likes';
+  if (comment?.likes && Array.isArray(comment.likes) && comment.likes.length > 0) {
+    likeLabel = comment.likes.length + ' ' + (comment.likes.length === 1 ? 'like' : 'likes');
+  }
+
   return (
     <div className='flex p-4 border-b dark:border-gray-600 text-sm'>
       <div className='flex-shrink-0 mr-3'>
@@ -110,10 +116,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
                 <FaThumbsUp className='text-sm' />
               </button>
               <p className='text-gray-400'>
-                {comment.numberOfLikes > 0 &&
-                  comment.numberOfLikes +
-                    ' ' +
-                    (comment.numberOfLikes === 1 ? 'like' : 'likes')}
+                {likeLabel}
               </p>
               {currentUser &&
                 (currentUser._id === comment.userId || currentUser.isAdmin) && (

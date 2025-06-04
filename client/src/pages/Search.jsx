@@ -36,20 +36,25 @@ export default function Search() {
     const fetchPosts = async () => {
       setLoading(true);
       const searchQuery = urlParams.toString();
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getposts?${searchQuery}`);
-      if (!res.ok) {
-        setLoading(false);
-        return;
-      }
-      if (res.ok) {
-        const data = await res.json();
-        setPosts(data.posts);
-        setLoading(false);
-        if (data.posts.length === 9) {
-          setShowMore(true);
-        } else {
-          setShowMore(false);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getposts?${searchQuery}`);
+        if (!res.ok) {
+          setLoading(false);
+          return;
         }
+        if (res.ok) {
+          const data = await res.json();
+          setPosts(data.posts);
+          setLoading(false);
+          if (data.posts.length === 9) {
+            setShowMore(true);
+          } else {
+            setShowMore(false);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+        setLoading(false);
       }
     };
     fetchPosts();
@@ -85,18 +90,22 @@ export default function Search() {
     const urlParams = new URLSearchParams(location.search);
     urlParams.set('startIndex', startIndex);
     const searchQuery = urlParams.toString();
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getposts?${searchQuery}`);
-    if (!res.ok) {
-      return;
-    }
-    if (res.ok) {
-      const data = await res.json();
-      setPosts([...posts, ...data.posts]);
-      if (data.posts.length === 10) {
-        setShowMore(true);
-      } else {
-        setShowMore(false);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getposts?${searchQuery}`);
+      if (!res.ok) {
+        return;
       }
+      if (res.ok) {
+        const data = await res.json();
+        setPosts([...posts, ...data.posts]);
+        if (data.posts.length === 10) {
+          setShowMore(true);
+        } else {
+          setShowMore(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching more posts:", error);
     }
   };
 
@@ -146,7 +155,7 @@ export default function Search() {
           Posts results:
         </h1>
         <div className='p-7 flex flex-wrap gap-4'>
-          {!loading && posts.length === 0 && (
+          {!loading && (!posts || posts.length === 0) && (
             <p className='text-xl text-gray-500'>No posts found.</p>
           )}
           {loading && <p className='text-xl text-gray-500'>Loading...</p>}

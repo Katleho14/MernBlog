@@ -53,14 +53,16 @@ export default function Search() {
               setShowMore(false);
             }
           } else {
-            console.warn("Data or data.posts is undefined or not an array");
+            console.warn("Data or data.posts is undefined or not an array", data);
             setLoading(false);
             setShowMore(false);
+            setPosts([]); // Ensure posts is an empty array to prevent errors
           }
         }
       } catch (error) {
         console.error("Error fetching posts:", error);
         setLoading(false);
+        setPosts([]); // Ensure posts is an empty array to prevent errors
       }
     };
     fetchPosts();
@@ -103,11 +105,13 @@ export default function Search() {
       }
       if (res.ok) {
         const data = await res.json();
-        setPosts([...posts, ...data.posts]);
-        if (data.posts.length === 10) {
-          setShowMore(true);
-        } else {
-          setShowMore(false);
+        if (data && data.posts && Array.isArray(data.posts)) {
+          setPosts([...posts, ...data.posts]);
+          if (data.posts.length === 10) {
+            setShowMore(true);
+          } else {
+            setShowMore(false);
+          }
         }
       }
     } catch (error) {

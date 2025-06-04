@@ -1,8 +1,9 @@
-const mysql = require('mysql2');
-require('dotenv').config();
+import mysql from 'mysql2';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 function connectToDatabase() {
-  // create a new MySQL connection
   const connection = mysql.createConnection({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -13,9 +14,9 @@ function connectToDatabase() {
 
   connection.connect((error) => {
     if (error) {
-      console.error('Error connecting to MySQL database:', error);
+      console.error('❌ Error connecting to MySQL database:', error);
     } else {
-      console.log('Connected to MySQL database!');
+      console.log('✅ Connected to MySQL database!');
     }
   });
 
@@ -23,6 +24,7 @@ function connectToDatabase() {
 }
 
 const connection = connectToDatabase();
-module.exports = connection;
+export default connection;
+
 
 

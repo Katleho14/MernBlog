@@ -169,7 +169,7 @@ export default function Search() {
             <p className='text-xl text-gray-500'>No posts found.</p>
           )}
           {loading && <p className='text-xl text-gray-500'>Loading...</p>}
-          {!loading && Array.isArray(posts) && (
+          {!loading && Array.isArray(posts) && posts.length > 0 && (
             posts?.map((post) => <PostCard key={post._id} post={post} />)
           )}
           {showMore && (

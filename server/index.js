@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import querystring from 'querystring';
 import { EventEmitter } from 'events';
 
 import userRoutes from './routes/user.route.js';
@@ -9,7 +8,6 @@ import authRoutes from './routes/auth.route.js';
 import postRoutes from './routes/post.route.js';
 import commentRoutes from './routes/comment.route.js';
 
-import db from './database.js'; // your DB connection (make sure it's exported using `export default`)
 
 dotenv.config(); // Load environment variables
 
@@ -19,7 +17,10 @@ EventEmitter.defaultMaxListeners = 15;
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'https://mernblog-q4t5.onrender.com/', // Replace with your frontend's origin
+  credentials: true, // Allow cookies to be sent
+}));
 app.use(express.json());
 
 // Routes

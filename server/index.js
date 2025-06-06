@@ -18,7 +18,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'https://mernblog-q4t5.onrender.com/', // Replace with your frontend's origin
+  origin: 'https://mernblog-q4t5.onrender.com', // Replace with your frontend's origin
   credentials: true, // Allow cookies to be sent
 }));
 app.use(express.json());

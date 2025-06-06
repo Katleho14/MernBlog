@@ -8,32 +8,38 @@ import DOMPurify from 'dompurify';
 const PostPage = () => {
   const { postSlug } = useParams();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState('');
   const [post, setPost] = useState(null);
   const [recentPosts, setRecentPosts] = useState([]);
 
+  // Fetch a single post by slug
   useEffect(() => {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        setError(false);
+        setError('');
 
-        console.log(`Fetching post with slug: ${postSlug}`);
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/post/getPost?slug=${encodeURIComponent(postSlug)}`;
+        console.log("Fetching post:", apiUrl);
 
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPost?slug=${postSlug}`);
-        console.log("Full API URL:", `${import.meta.env.VITE_API_BASE_URL}/api/post/getPost?slug=${postSlug}`);
+        const res = await fetch(apiUrl);
+
+        // Check if it's actually returning JSON
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Unexpected response format from server.');
+        }
+
         const data = await res.json();
 
-        console.log("API Response:", data);
-
         if (!res.ok || !data.success || !data.posts || data.posts.length === 0) {
-          throw new Error(data.message || "Post not found");
+          throw new Error(data.message || 'Post not found.');
         }
 
         setPost(data.posts[0]);
       } catch (err) {
-        console.error("Fetch Post Error:", err.message);
-        setError(true);
+        console.error('Fetch Post Error:', err.message);
+        setError(err.message || 'Something went wrong.');
       } finally {
         setLoading(false);
       }
@@ -42,34 +48,43 @@ const PostPage = () => {
     fetchPost();
   }, [postSlug]);
 
+  // Fetch recent posts
   useEffect(() => {
     const fetchRecentPosts = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts?limit=3`);
         const data = await res.json();
-        if (res.ok) {
+        if (res.ok && data.success) {
           setRecentPosts(data.posts);
         }
       } catch (err) {
         console.error('Error fetching recent posts:', err.message);
       }
     };
+
     fetchRecentPosts();
   }, []);
 
-  if (loading)
+  // Loading state
+  if (loading) {
     return (
       <div className='flex justify-center items-center min-h-screen'>
         <Spinner size='xl' />
       </div>
     );
+  }
 
-  if (error)
+  // Error state
+  if (error) {
     return (
-      <div className='flex justify-center items-center min-h-screen text-red-500'>
-        Error loading post. Please try again later.
+      <div className='flex justify-center items-center min-h-screen text-red-500 text-center px-4'>
+        <div>
+          <p className='text-lg font-semibold'>Error loading post:</p>
+          <p className='mt-2'>{error}</p>
+        </div>
       </div>
     );
+  }
 
   return (
     <main className='p-3 flex flex-col max-w-6xl mx-auto min-h-screen'>
@@ -92,10 +107,10 @@ const PostPage = () => {
       <div className='flex justify-between p-3 border-b border-slate-500 mx-auto w-full max-w-2xl text-xs'>
         <span>{post?.createdAt && new Date(post.createdAt).toLocaleDateString()}</span>
         <span className='italic'>
-          {post?.content && post.content.length ? (post.content.length / 1000).toFixed(0) : 0} mins read
+          {post?.content?.length ? Math.ceil(post.content.length / 1000) : 0} mins read
         </span>
       </div>
-      
+
       {post?.content && (
         <div
           className='p-3 max-w-2xl mx-auto w-full post-content'
@@ -111,7 +126,9 @@ const PostPage = () => {
         <h1 className='text-xl mt-5'>Recent articles</h1>
         <div className='flex flex-wrap gap-5 mt-5 justify-center'>
           {recentPosts.length > 0 ? (
-            recentPosts.map((recentPost) => <PostCard key={recentPost._id} post={recentPost} />)
+            recentPosts.map((recentPost) => (
+              <PostCard key={recentPost.id} post={recentPost} />
+            ))
           ) : (
             <p className='text-center text-gray-500'>No recent posts available.</p>
           )}

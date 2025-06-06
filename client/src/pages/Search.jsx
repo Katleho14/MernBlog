@@ -19,26 +19,23 @@ export default function Search() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    const searchTermFromUrl = urlParams.get('searchTerm');
-    const sortFromUrl = urlParams.get('sort');
-    const categoryFromUrl = urlParams.get('category');
 
     setSidebarData({
-      searchTerm: searchTermFromUrl || '',
-      sort: sortFromUrl || 'desc',
-      category: categoryFromUrl || 'uncategorized',
+      searchTerm: urlParams.get('searchTerm') || '',
+      sort: urlParams.get('sort') || 'desc',
+      category: urlParams.get('category') || 'uncategorized',
     });
 
     const fetchPosts = async () => {
       setLoading(true);
-      const searchQuery = urlParams.toString();
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts?${searchQuery}`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts?${urlParams.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch posts');
         const data = await res.json();
-        if (Array.isArray(data)) {
-          setPosts(data);
-          setShowMore(data.length === 9); // adjust per your backend pagination logic
+
+        if (data.success && Array.isArray(data.posts)) {
+          setPosts(data.posts);
+          setShowMore(data.posts.length === 9); // your page size
         } else {
           console.warn('Unexpected data structure:', data);
           setPosts([]);
@@ -75,11 +72,12 @@ export default function Search() {
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts?${urlParams.toString()}`);
-      if (!res.ok) return;
+      if (!res.ok) throw new Error('Failed to fetch more posts');
       const data = await res.json();
-      if (Array.isArray(data)) {
-        setPosts((prev) => [...prev, ...data]);
-        setShowMore(data.length === 9);
+
+      if (data.success && Array.isArray(data.posts)) {
+        setPosts((prev) => [...prev, ...data.posts]);
+        setShowMore(data.posts.length === 9);
       }
     } catch (error) {
       console.error('Error fetching more posts:', error);
@@ -91,7 +89,7 @@ export default function Search() {
       <div className='p-7 border-b md:border-r md:min-h-screen border-gray-500'>
         <form className='flex flex-col gap-8' onSubmit={handleSubmit}>
           <div className='flex items-center gap-2'>
-            <label className='whitespace-nowrap font-semibold'>
+            <label className='whitespace-nowrap font-semibold' htmlFor='searchTerm'>
               Search Term:
             </label>
             <TextInput
@@ -103,14 +101,14 @@ export default function Search() {
             />
           </div>
           <div className='flex items-center gap-2'>
-            <label className='font-semibold'>Sort:</label>
+            <label className='font-semibold' htmlFor='sort'>Sort:</label>
             <Select onChange={handleChange} value={sidebarData.sort} id='sort'>
               <option value='desc'>Latest</option>
               <option value='asc'>Oldest</option>
             </Select>
           </div>
           <div className='flex items-center gap-2'>
-            <label className='font-semibold'>Category:</label>
+            <label className='font-semibold' htmlFor='category'>Category:</label>
             <Select onChange={handleChange} value={sidebarData.category} id='category'>
               <option value='uncategorized'>Uncategorized</option>
               <option value='reactjs'>React.js</option>
@@ -134,8 +132,7 @@ export default function Search() {
           {!loading && posts.length === 0 && (
             <p className='text-xl text-gray-500'>No posts found.</p>
           )}
-          {!loading &&
-            posts.map((post) => <PostCard key={post._id} post={post} />)}
+          {!loading && posts.map((post) => <PostCard key={post._id} post={post} />)}
           {showMore && (
             <button
               onClick={handleShowMore}

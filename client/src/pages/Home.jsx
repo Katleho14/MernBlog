@@ -13,7 +13,7 @@ export default function Home() {
         const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts`);
         if (!res.ok) throw new Error('Failed to fetch posts');
         const data = await res.json();
-        setPosts(data); // ✅ API returns array directly
+        setPosts(data.posts || []);  // assuming your API returns { posts: [...] }
       } catch (error) {
         console.error('Error fetching posts:', error.message);
       } finally {
@@ -22,6 +22,32 @@ export default function Home() {
     };
     fetchPosts();
   }, []);
+
+  // Helper function to render posts or messages
+  const renderPostsSection = () => {
+    if (loading) {
+      return <p className='text-center text-gray-500'>Loading posts...</p>;
+    }
+    if (posts.length === 0) {
+      return <p className='text-center text-gray-500'>No posts available.</p>;
+    }
+    return (
+      <div className='flex flex-col gap-6'>
+        <h2 className='text-2xl font-semibold text-center'>Recent Posts</h2>
+        <div className='flex flex-wrap gap-4'>
+          {posts.map((post) => (
+            <PostCard key={post._id} post={post} />
+          ))}
+        </div>
+        <Link
+          to={'/search'}
+          className='text-lg text-teal-500 hover:underline text-center'
+        >
+          View all posts
+        </Link>
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -44,31 +70,11 @@ export default function Home() {
       </div>
 
       <div className='max-w-6xl mx-auto p-3 flex flex-col gap-8 py-7'>
-        {loading && (
-          <p className='text-center text-gray-500'>Loading posts...</p>
-        )}
-        {!loading && posts && posts.length > 0 && (
-          <div className='flex flex-col gap-6'>
-            <h2 className='text-2xl font-semibold text-center'>Recent Posts</h2>
-            <div className='flex flex-wrap gap-4'>
-              {posts.map((post) => (
-                <PostCard key={post._id} post={post} />
-              ))}
-            </div>
-            <Link
-              to={'/search'}
-              className='text-lg text-teal-500 hover:underline text-center'
-            >
-              View all posts
-            </Link>
-          </div>
-        )}
-        {!loading && (!posts || posts.length === 0) && (
-          <p className='text-center text-gray-500'>No posts available.</p>
-        )}
+        {renderPostsSection()}
       </div>
     </div>
   );
 }
+
 
 

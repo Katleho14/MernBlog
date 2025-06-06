@@ -9,6 +9,7 @@ export default function Search() {
     sort: 'desc',
     category: 'uncategorized',
   });
+
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showMore, setShowMore] = useState(false);
@@ -18,35 +19,32 @@ export default function Search() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    const searchTermFromUrl = urlParams.get('searchTerm') || '';
-    const sortFromUrl = urlParams.get('sort') || 'desc';
-    const categoryFromUrl = urlParams.get('category') || 'uncategorized';
+    const searchTermFromUrl = urlParams.get('searchTerm');
+    const sortFromUrl = urlParams.get('sort');
+    const categoryFromUrl = urlParams.get('category');
 
     setSidebarData({
-      searchTerm: searchTermFromUrl,
-      sort: sortFromUrl,
-      category: categoryFromUrl,
+      searchTerm: searchTermFromUrl || '',
+      sort: sortFromUrl || 'desc',
+      category: categoryFromUrl || 'uncategorized',
     });
 
     const fetchPosts = async () => {
       setLoading(true);
+      const searchQuery = urlParams.toString();
       try {
-        const url = `${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts?${urlParams.toString()}`;
-        console.log('Fetching search posts from:', url);
-        const res = await fetch(url);
-
-        if (!res.ok) throw new Error(`Error ${res.status}: Failed to fetch`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts?${searchQuery}`);
+        if (!res.ok) throw new Error('Failed to fetch posts');
         const data = await res.json();
-
-        if (Array.isArray(data.posts)) {
-          setPosts(data.posts);
-          setShowMore(data.posts.length === 9);
+        if (Array.isArray(data)) {
+          setPosts(data);
+          setShowMore(data.length === 9); // adjust per your backend pagination logic
         } else {
+          console.warn('Unexpected data structure:', data);
           setPosts([]);
-          setShowMore(false);
         }
       } catch (error) {
-        console.error('Error fetching posts:', error.message);
+        console.error('Error fetching posts:', error);
         setPosts([]);
       } finally {
         setLoading(false);
@@ -57,17 +55,17 @@ export default function Search() {
   }, [location.search]);
 
   const handleChange = (e) => {
-    setSidebarData({ ...sidebarData, [e.target.id]: e.target.value });
+    const { id, value } = e.target;
+    setSidebarData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const searchQuery = new URLSearchParams({
-      searchTerm: sidebarData.searchTerm,
-      sort: sidebarData.sort,
-      category: sidebarData.category,
-    }).toString();
-    navigate(`/search?${searchQuery}`);
+    const urlParams = new URLSearchParams();
+    urlParams.set('searchTerm', sidebarData.searchTerm);
+    urlParams.set('sort', sidebarData.sort);
+    urlParams.set('category', sidebarData.category);
+    navigate(`/search?${urlParams.toString()}`);
   };
 
   const handleShowMore = async () => {
@@ -76,15 +74,15 @@ export default function Search() {
     urlParams.set('startIndex', startIndex);
 
     try {
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts?${urlParams.toString()}`;
-      const res = await fetch(url);
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/post/getPosts?${urlParams.toString()}`);
+      if (!res.ok) return;
       const data = await res.json();
-      if (Array.isArray(data.posts)) {
-        setPosts((prev) => [...prev, ...data.posts]);
-        setShowMore(data.posts.length === 10);
+      if (Array.isArray(data)) {
+        setPosts((prev) => [...prev, ...data]);
+        setShowMore(data.length === 9);
       }
     } catch (error) {
-      console.error('Error fetching more posts:', error.message);
+      console.error('Error fetching more posts:', error);
     }
   };
 
@@ -93,7 +91,9 @@ export default function Search() {
       <div className='p-7 border-b md:border-r md:min-h-screen border-gray-500'>
         <form className='flex flex-col gap-8' onSubmit={handleSubmit}>
           <div className='flex items-center gap-2'>
-            <label className='whitespace-nowrap font-semibold'>Search Term:</label>
+            <label className='whitespace-nowrap font-semibold'>
+              Search Term:
+            </label>
             <TextInput
               placeholder='Search...'
               id='searchTerm'
@@ -104,14 +104,14 @@ export default function Search() {
           </div>
           <div className='flex items-center gap-2'>
             <label className='font-semibold'>Sort:</label>
-            <Select id='sort' value={sidebarData.sort} onChange={handleChange}>
+            <Select onChange={handleChange} value={sidebarData.sort} id='sort'>
               <option value='desc'>Latest</option>
               <option value='asc'>Oldest</option>
             </Select>
           </div>
           <div className='flex items-center gap-2'>
             <label className='font-semibold'>Category:</label>
-            <Select id='category' value={sidebarData.category} onChange={handleChange}>
+            <Select onChange={handleChange} value={sidebarData.category} id='category'>
               <option value='uncategorized'>Uncategorized</option>
               <option value='reactjs'>React.js</option>
               <option value='nextjs'>Next.js</option>
@@ -126,7 +126,7 @@ export default function Search() {
 
       <div className='w-full'>
         <h1 className='text-3xl font-semibold sm:border-b border-gray-500 p-3 mt-5'>
-          Post results:
+          Posts results:
         </h1>
         <div className='p-7 flex flex-wrap gap-4'>
           {loading && <p className='text-xl text-gray-500'>Loading...</p>}
@@ -134,7 +134,6 @@ export default function Search() {
             <p className='text-xl text-gray-500'>No posts found.</p>
           )}
           {!loading &&
-            posts.length > 0 &&
             posts.map((post) => <PostCard key={post._id} post={post} />)}
           {showMore && (
             <button

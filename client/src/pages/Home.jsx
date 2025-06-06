@@ -60,7 +60,7 @@ export default function Home() {
         {loading ? (
           <p className="text-center text-gray-500">Loading posts...</p>
         ) : posts.length > 0 ? (
-          <div className="flex flex-col gap-6">
+          <div className='flex flex-col gap-6'>
             <h2 className="text-2xl font-semibold text-center">Recent Posts</h2>
             <div className="flex flex-wrap gap-4">
               {posts.map((post) => (
@@ -68,7 +68,7 @@ export default function Home() {
               ))}
             </div>
             <Link
-              to="/search"
+              to='/search'
               className="text-lg text-teal-500 hover:underline text-center"
             >
               View all posts
@@ -81,3 +81,4 @@ export default function Home() {
     </div>
   );
 }
+

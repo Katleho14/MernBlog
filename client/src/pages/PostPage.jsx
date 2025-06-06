@@ -19,24 +19,20 @@ const PostPage = () => {
         setLoading(true);
         setError('');
 
-        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/post/getPost?slug=${encodeURIComponent(postSlug)}`;
-        console.log("Fetching post:", apiUrl);
-
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/post/getPost/${encodeURIComponent(postSlug)}`;
         const res = await fetch(apiUrl);
 
-        // Check if it's actually returning JSON
-        const contentType = res.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Unexpected response format from server.');
+        if (!res.ok) {
+          throw new Error(`Post not found (status ${res.status})`);
         }
 
         const data = await res.json();
 
-        if (!res.ok || !data.success || !data.posts || data.posts.length === 0) {
+        if (!data || !data.post) {
           throw new Error(data.message || 'Post not found.');
         }
 
-        setPost(data.posts[0]);
+        setPost(data.post);
       } catch (err) {
         console.error('Fetch Post Error:', err.message);
         setError(err.message || 'Something went wrong.');
@@ -91,10 +87,7 @@ const PostPage = () => {
       <h1 className='text-3xl mt-10 p-3 text-center font-serif max-w-2xl mx-auto lg:text-4xl'>
         {post?.title}
       </h1>
-      <Link
-        to={`/search?category=${post?.category}`}
-        className='self-center mt-5'
-      >
+      <Link to={`/search?category=${post?.category}`} className='self-center mt-5'>
         <Button color='gray' pill size='xs'>
           {post?.category}
         </Button>
@@ -127,7 +120,7 @@ const PostPage = () => {
         <div className='flex flex-wrap gap-5 mt-5 justify-center'>
           {recentPosts.length > 0 ? (
             recentPosts.map((recentPost) => (
-              <PostCard key={recentPost.id} post={recentPost} />
+              <PostCard key={recentPost._id || recentPost.id} post={recentPost} />
             ))
           ) : (
             <p className='text-center text-gray-500'>No recent posts available.</p>

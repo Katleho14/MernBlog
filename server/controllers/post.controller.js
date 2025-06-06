@@ -1,6 +1,5 @@
 // controllers/post.controller.js
 import {
-  createPostsTable,
   createPost as createPostModel,
   getAllPosts as getAllPostsModel,
   getPostBySlug as getPostBySlugModel,
